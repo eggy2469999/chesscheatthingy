@@ -24,12 +24,7 @@ jobs:
           cd app/src/main/cpp
           git clone https://github.com/official-stockfish/Stockfish.git stockfish
           cd stockfish/src
-          # Download the exact neural net file the C++ code is looking for
           wget https://tests.stockfishchess.org/api/nn/nn-c9e480e92425.nnue
-          cd ../../..
-          cd ../..
-          # Move it to where the compiler expects it
-          mv app/src/main/cpp/stockfish/src/nn-c9e480e92425.nnue app/src/main/cpp/stockfish/src/
 
       - name: Build Debug APK
         run: gradle assembleDebug
