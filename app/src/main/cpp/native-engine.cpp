@@ -5,30 +5,36 @@
 #include "stockfish/src/uci.h"
 #include "stockfish/src/position.h"
 
+// Stockfish defines these globally in uci.cpp, not in the namespace.
+namespace Stockfish {
+    class OptionsMap;
+    extern OptionsMap Options;
+}
+
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_example_chesoverlay_StockfishEngine_getBestMove(JNIEnv *env, jobject, jstring fenString, jint depth) {
     const char *fen = env->GetStringUTFChars(fenString, 0);
     std::string fenStr(fen);
     env->ReleaseStringUTFChars(fenString, fen);
 
-    // Initialize UCI
-    Stockfish::UCI::init(Stockfish::Options);
+    // Use the correct namespace and engine init
+    Stockfish::UCIEngine::init(Stockfish::Options);
     
     Stockfish::Position pos;
     Stockfish::StateInfo si;
     pos.set(fenStr, false, &si);
 
-    // Capture the engine's output stream
+    // Capture output
     std::stringstream buffer;
     std::streambuf* oldCout = std::cout.rdbuf(buffer.rdbuf());
     
-    // Tell Stockfish to calculate
-    Stockfish::UCI::command("go depth " + std::to_string(depth));
+    // Send the command using the correct namespace
+    Stockfish::UCIEngine::command("go depth " + std::to_string(depth));
     
-    // Restore normal output
+    // Restore
     std::cout.rdbuf(oldCout);
 
-    // Parse the output for best move and eval
+    // Parse output
     std::string best = "e2e4";
     std::string alt = "d2d4";
     std::string eval = "+0.0";
@@ -38,8 +44,8 @@ Java_com_example_chesoverlay_StockfishEngine_getBestMove(JNIEnv *env, jobject, j
     while (std::getline(ss, line)) {
         if (line.find("score cp") != std::string::npos) {
             size_t pos = line.find("score cp") + 9;
-            eval = line.substr(pos, line.find(" ", pos) - pos);
-            eval = (std::stoi(eval) > 0 ? "+" : "") + std::to_string(std::stoi(eval) / 100.0);
+            std::string scoreStr = line.substr(pos, line.find(" ", pos) - pos);
+            eval = (std::stoi(scoreStr) > 0 ? "+" : "") + std::to_string(std::stoi(scoreStr) / 100.0);
         }
         if (line.find("bestmove") != std::string::npos) {
             best = line.substr(9, 4);
