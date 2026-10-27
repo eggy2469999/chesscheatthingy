@@ -18,14 +18,18 @@ jobs:
         with:
           gradle-version: 8.2
 
-      - name: Download Stockfish Source
+      - name: Download Stockfish and NNUE
         run: |
           mkdir -p app/src/main/cpp
           cd app/src/main/cpp
           git clone https://github.com/official-stockfish/Stockfish.git stockfish
           cd stockfish/src
-          # Create the dummy neural net header so the C++ compiler doesn't fail
-          echo "const char *g_nnue_eval = \"\";" > nnue_eval.h
+          # Download the exact neural net file the C++ code is looking for
+          wget https://tests.stockfishchess.org/api/nn/nn-c9e480e92425.nnue
+          cd ../../..
+          cd ../..
+          # Move it to where the compiler expects it
+          mv app/src/main/cpp/stockfish/src/nn-c9e480e92425.nnue app/src/main/cpp/stockfish/src/
 
       - name: Build Debug APK
         run: gradle assembleDebug
