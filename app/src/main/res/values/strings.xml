@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Chess Overlay</string>
+    <string name="accessibility_description">Chess Overlay Service</string>
+</resources>
