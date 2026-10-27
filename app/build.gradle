@@ -7,6 +7,7 @@ android {
     namespace 'com.example.chesoverlay'
     compileSdk 34
     buildToolsVersion "34.0.0"
+    ndkVersion "25.2.9519653"
 
     defaultConfig {
         applicationId "com.example.chesoverlay"
@@ -14,6 +15,15 @@ android {
         targetSdk 34
         versionCode 1
         versionName "1.0"
+
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++17"
+            }
+        }
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
     }
 
     buildTypes {
@@ -28,11 +38,15 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version "3.22.1"
+        }
+    }
 }
 
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.9.0'
-    // ML Kit for vision
-    implementation 'com.google.mlkit:image-labeling:17.0.7'
 }
