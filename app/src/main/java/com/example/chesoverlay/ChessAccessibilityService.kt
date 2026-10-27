@@ -26,8 +26,13 @@ class ChessAccessibilityService : AccessibilityService() {
             Handler(Looper.getMainLooper()).postDelayed({
                 takeScreenshot(Display.DEFAULT_DISPLAY, mainExecutor, object : TakeScreenshotCallback {
                     override fun onSuccess(screenshot: ScreenshotResult) {
+                        // Safe call with ?.let in case hardwareBuffer fails
                         val bitmap = Bitmap.wrapHardwareBuffer(screenshot.hardwareBuffer, screenshot.colorSpace)
-                        processBoard(bitmap, screenshot.hardwareBuffer)
+                        if (bitmap != null) {
+                            processBoard(bitmap, screenshot.hardwareBuffer)
+                        } else {
+                            screenshot.hardwareBuffer.close()
+                        }
                     }
                     override fun onFailure(errorCode: Int) {
                         // Fallback: create a dummy bitmap so the app doesn't crash
