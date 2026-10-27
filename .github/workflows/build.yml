@@ -18,14 +18,6 @@ jobs:
         with:
           gradle-version: 8.2
 
-      - name: Download Stockfish and NNUE
-        run: |
-          mkdir -p app/src/main/cpp
-          cd app/src/main/cpp
-          git clone https://github.com/official-stockfish/Stockfish.git stockfish
-          cd stockfish/src
-          wget https://tests.stockfishchess.org/api/nn/nn-c9e480e92425.nnue
-
       - name: Build Debug APK
         run: gradle assembleDebug
 
