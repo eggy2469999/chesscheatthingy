@@ -24,6 +24,7 @@ jobs:
           cd app/src/main/cpp
           git clone https://github.com/official-stockfish/Stockfish.git stockfish
           cd stockfish/src
+          # Create the dummy neural net header so the C++ compiler doesn't fail
           echo "const char *g_nnue_eval = \"\";" > nnue_eval.h
 
       - name: Build Debug APK
