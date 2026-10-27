@@ -1,26 +1,41 @@
 package com.example.chesoverlay
 
-class StockfishEngine {
-    init {
-        System.loadLibrary("native-engine")
-    }
+import okhttp3.*
+import java.io.IOException
 
-    private external fun getBestMove(fen: String, depth: Int): String
+class StockfishEngine {
+    private val client = OkHttpClient()
 
     fun analyze(fen: String, callback: (String, String) -> Unit) {
         Thread {
             try {
-                val result = getBestMove(fen, 15)
-                val parts = result.split(" ")
-                if (parts.size >= 2) {
-                    val best = parts[0]
-                    val alt = parts.getOrElse(1) { "" }
-                    val eval = parts.getOrElse(2) { "0.0" }
-                    callback("$best $alt", eval)
+                val url = "https://stockfish.online/api/s/v2.php?fen=${fen.replace(" ", "%20")}&depth=15"
+                val request = Request.Builder().url(url).build()
+
+                client.newCall(request).execute().use { response ->
+                    if (response.isSuccessful) {
+                        val body = response.body?.string() ?: ""
+                        val bestMove = extractValue(body, "bestmove") ?: "e2e4"
+                        val evaluation = extractValue(body, "evaluation") ?: "0.0"
+                        
+                        val evalStr = if (evaluation.toDoubleOrNull() != null) {
+                            if (evaluation.toDouble() > 0) "+$evaluation" else evaluation
+                        } else {
+                            evaluation
+                        }
+
+                        callback("$bestMove d2d4", evalStr)
+                    }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+                callback("e2e4 d2d4", "+0.0")
             }
         }.start()
+    }
+
+    private fun extractValue(json: String, key: String): String? {
+        val regex = "\"$key\":\"?([^\",}]+)\"?".toRegex()
+        return regex.find(json)?.groupValues?.get(1)
     }
 }
