@@ -18,13 +18,11 @@ jobs:
         with:
           gradle-version: 8.2
 
-      - name: Download Stockfish and NNUE
+      - name: Download Prebuilt Stockfish
         run: |
-          mkdir -p app/src/main/cpp
-          cd app/src/main/cpp
-          git clone https://github.com/official-stockfish/Stockfish.git stockfish
-          cd stockfish/src
-          wget https://tests.stockfishchess.org/api/nn/nn-c9e480e92425.nnue
+          mkdir -p app/src/main/jniLibs/arm64-v8a
+          # Download a working precompiled Stockfish for Android arm64
+          wget -O app/src/main/jniLibs/arm64-v8a/libstockfish.so https://github.com/TechnoMancer/stockfish-android/raw/master/app/src/main/jniLibs/arm64-v8a/libstockfish.so
 
       - name: Build Debug APK
         run: gradle assembleDebug
